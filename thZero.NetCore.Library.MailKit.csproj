@@ -4,10 +4,10 @@
 		<TargetFramework>netstandard2.0</TargetFramework>
 		<AssemblyName>thZero.NetCore.Library.MailKit</AssemblyName>
 		<PackageId>thZero.NetCore.Library.MailKit</PackageId>
-		<PackageTargetFallback>$(PackageTargetFallback);dnxcore50</PackageTargetFallback>
 		<GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
 		<GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
 		<GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
+    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
 		<RepositoryUrl>https://github.com/thzero/thZero.NetCore.Library.MailKit</RepositoryUrl>
@@ -15,7 +15,6 @@
 		<PackageLicenseUrl>http://www.apache.org/licenses/LICENSE-2.0.txt</PackageLicenseUrl>
 		<Authors>thZero.com</Authors>
 		<PackageProjectUrl>https://github.com/thzero/thZero.NetCore.Library.MailKit</PackageProjectUrl>
-		<Copyright></Copyright>
 		<RootNamespace>thZero.Services</RootNamespace>
 	</PropertyGroup>
 

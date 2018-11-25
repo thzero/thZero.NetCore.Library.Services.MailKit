@@ -20,201 +20,265 @@ limitations under the License.
 using System;
 using System.Threading.Tasks;
 
+using Microsoft.Extensions.Logging;
+
 using MailKit.Net.Smtp;
 using MimeKit;
 
 namespace thZero.Services
 {
-	public sealed class ServiceMailKit : IServiceMail
-	{
+	public sealed class ServiceMailKitFactory : Internal.ServiceMailKitBase<ServiceMailKitFactory>, IServiceMail
+    {
 		private static readonly thZero.Services.IServiceLog log = thZero.Factory.Instance.RetrieveLogger(System.Reflection.MethodBase.GetCurrentMethod().DeclaringType);
 
-		#region Public Methods
-		public void Send(string toAddress, string subject, string body, Configuration.ApplicationEmail config)
-		{
-			Send(new MailboxAddress(toAddress), subject, body, null, config);
-		}
+        public ServiceMailKitFactory() : base(log, null)
+        {
+        }
+    }
 
-		public void Send(string toAddress, string subject, string body, string fromAddress, Configuration.ApplicationEmail config)
-		{
-			Enforce.AgainstNullOrEmpty(() => fromAddress);
+    public sealed class ServiceMailKit : ServiceLoggableBase<ServiceMailKit>, IServiceMail
+    {
+        public ServiceMailKit(ILogger<ServiceMailKit> logger) : base(logger)
+        {
+            _instance = new Internal.ServiceMailKitBase<ServiceMailKit>(null, logger);
+        }
 
-			Send(new MailboxAddress(toAddress), subject, body, new MailboxAddress(fromAddress), config);
-		}
+        #region Public Methods
+        public void Send(string toAddress, string subject, string body, Configuration.ApplicationEmail config)
+        {
+            _instance.Send(toAddress, subject, body, config);
+        }
 
-		public async Task<bool> SendAsync(string toAddress, string subject, string body, Configuration.ApplicationEmail config)
-		{
-			return await SendAsync(new MailboxAddress(toAddress), subject, body, null, config);
-		}
+        public void Send(string toAddress, string subject, string body, string fromAddress, Configuration.ApplicationEmail config)
+        {
+            _instance.Send(toAddress, subject, body, fromAddress, config);
+        }
 
-		public async Task<bool> SendAsync(string toAddress, string subject, string body, string fromAddress, Configuration.ApplicationEmail config)
-		{
-			return await SendAsync(new MailboxAddress(toAddress), subject, body, new MailboxAddress(fromAddress), config);
-		}
+        public async Task<bool> SendAsync(string toAddress, string subject, string body, Configuration.ApplicationEmail config)
+        {
+            return await _instance.SendAsync(toAddress, subject, body, config);
+        }
 
-		public void Send(string toAddress, string toDisplayName, string subject, string body, string fromAddress, string fromDisplayName, Configuration.ApplicationEmail config)
-		{
-			const string Declaration = "Send";
+        public async Task<bool> SendAsync(string toAddress, string subject, string body, string fromAddress, Configuration.ApplicationEmail config)
+        {
+            return await _instance.SendAsync(toAddress, subject, body, fromAddress, config);
+        }
 
-			try
-			{
-				MailboxAddress address = null;
-				if (!string.IsNullOrEmpty(fromAddress))
-					address = new MailboxAddress(fromAddress, fromDisplayName);
+        public void Send(string toAddress, string toDisplayName, string subject, string body, string fromAddress, string fromDisplayName, Configuration.ApplicationEmail config)
+        {
+            _instance.Send(toAddress, toDisplayName, subject, body, fromAddress, fromDisplayName, config);
+        }
 
-				Send(new MailboxAddress(toAddress, toDisplayName), subject, body, address, config);
-			}
-			catch (Exception ex)
-			{
-				log.Error(Declaration, ex);
-				throw;
-			}
-		}
+        public async Task<bool> SendAsync(string toAddress, string toDisplayName, string subject, string body, string fromAddress, string fromDisplayName, Configuration.ApplicationEmail config)
+        {
+            return await _instance.SendAsync(toAddress, toDisplayName, subject, body, fromAddress, fromDisplayName, config);
+        }
+        #endregion
 
-		public async Task<bool> SendAsync(string toAddress, string toDisplayName, string subject, string body, string fromAddress, string fromDisplayName, Configuration.ApplicationEmail config)
-		{
-			const string Declaration = "Send";
+        #region Fields
+        private static Internal.ServiceMailKitBase<ServiceMailKit> _instance;
+        #endregion
+    }
+}
 
-			try
-			{
-				MailboxAddress address = null;
-				if (!string.IsNullOrEmpty(fromAddress))
-					address = new MailboxAddress(fromAddress, fromDisplayName);
+namespace thZero.Services.Internal
+{
+    public class ServiceMailKitBase<TService> : IntermediaryServiceBase<TService>
+    {
+        public ServiceMailKitBase(thZero.Services.IServiceLog log, ILogger<TService> logger) : base(log, logger)
+        {
+        }
 
-				return await SendAsync(new MailboxAddress(toAddress, toDisplayName), subject, body, address, config);
-			}
-			catch (Exception ex)
-			{
-				log.Error(Declaration, ex);
-				throw;
-			}
-		}
-		#endregion
+        #region Public Methods
+        public void Send(string toAddress, string subject, string body, Configuration.ApplicationEmail config)
+        {
+            Send(new MailboxAddress(toAddress), subject, body, null, config);
+        }
 
-		#region Private Methods
-		private void Send(MailboxAddress toAddress, string subject, string body, MailboxAddress fromAddress, Configuration.ApplicationEmail config)
-		{
-			Enforce.AgainstNull(() => toAddress);
-			Enforce.AgainstNullOrEmpty(() => subject);
-			Enforce.AgainstNullOrEmpty(() => body);
+        public void Send(string toAddress, string subject, string body, string fromAddress, Configuration.ApplicationEmail config)
+        {
+            Enforce.AgainstNullOrEmpty(() => fromAddress);
 
-			const string Declaration = "Send";
+            Send(new MailboxAddress(toAddress), subject, body, new MailboxAddress(fromAddress), config);
+        }
 
-			try
-			{
-				if ((config == null) && !config.Enabled)
-					return;
+        public async Task<bool> SendAsync(string toAddress, string subject, string body, Configuration.ApplicationEmail config)
+        {
+            return await SendAsync(new MailboxAddress(toAddress), subject, body, null, config);
+        }
 
-				if (string.IsNullOrEmpty(config.SmtpServer))
-					//throw new EmailInvalidConfigurationException("Unable to send email, no SmtpServer specified in configuration.");
-					throw new Exception("Unable to send email, no SmtpServer specified in configuration.");
+        public async Task<bool> SendAsync(string toAddress, string subject, string body, string fromAddress, Configuration.ApplicationEmail config)
+        {
+            return await SendAsync(new MailboxAddress(toAddress), subject, body, new MailboxAddress(fromAddress), config);
+        }
 
-				if (fromAddress == null)
-					fromAddress = new MailboxAddress(config.AddressFrom, config.AddressFrom);
+        public void Send(string toAddress, string toDisplayName, string subject, string body, string fromAddress, string fromDisplayName, Configuration.ApplicationEmail config)
+        {
+            const string Declaration = "Send";
 
-				MimeMessage message = new MimeMessage()
-				{
-					Subject = subject,
-					Body = new TextPart("plain")
-					{
-						Text = body
-					}
-				};
-				message.From.Add(fromAddress);
-				message.To.Add(toAddress);
+            try
+            {
+                MailboxAddress address = null;
+                if (!string.IsNullOrEmpty(fromAddress))
+                    address = new MailboxAddress(fromAddress, fromDisplayName);
 
-				using (SmtpClient client = new SmtpClient())
-				{
-					try
-					{
-						client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-						client.Connect(config.SmtpServer, Convert.ToInt32(config.SmtpPort), true);
-						// Note: since we don't have an OAuth2 token, disable
-						// the XOAUTH2 authentication mechanism.
-						client.AuthenticationMechanisms.Remove("XOAUTH2");
-						client.Authenticate(config.SmtpUser, config.SmtpUserPassword);
+                Send(new MailboxAddress(toAddress, toDisplayName), subject, body, address, config);
+            }
+            catch (Exception ex)
+            {
+                Log?.Error(Declaration, ex);
+                Logger?.LogError(Declaration, ex);
+                throw;
+            }
+        }
 
-						client.Send(message);
-					}
-					finally
-					{
-						if (client != null)
-						{
-							if (client.IsConnected)
-								client.Disconnect(true);
-						}
-					}
-				}
-			}
-			catch (Exception ex)
-			{
-				log.Error(Declaration, ex);
-				throw;
-			}
-		}
+        public async Task<bool> SendAsync(string toAddress, string toDisplayName, string subject, string body, string fromAddress, string fromDisplayName, Configuration.ApplicationEmail config)
+        {
+            const string Declaration = "Send";
 
-		private async Task<bool> SendAsync(MailboxAddress toAddress, string subject, string body, MailboxAddress fromAddress, Configuration.ApplicationEmail config)
-		{
-			Enforce.AgainstNull(() => toAddress);
-			Enforce.AgainstNullOrEmpty(() => subject);
-			Enforce.AgainstNullOrEmpty(() => body);
+            try
+            {
+                MailboxAddress address = null;
+                if (!string.IsNullOrEmpty(fromAddress))
+                    address = new MailboxAddress(fromAddress, fromDisplayName);
 
-			const string Declaration = "Send";
+                return await SendAsync(new MailboxAddress(toAddress, toDisplayName), subject, body, address, config);
+            }
+            catch (Exception ex)
+            {
+                Log?.Error(Declaration, ex);
+                Logger?.LogError(Declaration, ex);
+                throw;
+            }
+        }
+        #endregion
 
-			try
-			{
-				if ((config == null) && !config.Enabled)
-					return await Task.FromResult(false);
+        #region Private Methods
+        private void Send(MailboxAddress toAddress, string subject, string body, MailboxAddress fromAddress, Configuration.ApplicationEmail config)
+        {
+            Enforce.AgainstNull(() => toAddress);
+            Enforce.AgainstNullOrEmpty(() => subject);
+            Enforce.AgainstNullOrEmpty(() => body);
 
-				if (string.IsNullOrEmpty(config.SmtpServer))
-					//throw new EmailInvalidConfigurationException("Unable to send email, no SmtpServer specified in configuration.");
-					throw new Exception("Unable to send email, no SmtpServer specified in configuration.");
+            const string Declaration = "Send";
 
-				if (fromAddress == null)
-					fromAddress = new MailboxAddress(config.AddressFrom, config.AddressFrom);
+            try
+            {
+                if ((config == null) && !config.Enabled)
+                    return;
 
-				MimeMessage message = new MimeMessage()
-				{
-					Subject = subject,
-					Body = new TextPart("plain")
-					{
-						Text = body
-					}
-				};
-				message.From.Add(fromAddress);
-				message.To.Add(toAddress);
+                if (string.IsNullOrEmpty(config.SmtpServer))
+                    //throw new EmailInvalidConfigurationException("Unable to send email, no SmtpServer specified in configuration.");
+                    throw new Exception("Unable to send email, no SmtpServer specified in configuration.");
 
-				using (SmtpClient client = new SmtpClient())
-				{
-					try
-					{
-						client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-						client.Connect(config.SmtpServer, Convert.ToInt32(config.SmtpPort), false);
-						// Note: since we don't have an OAuth2 token, disable
-						// the XOAUTH2 authentication mechanism.
-						client.AuthenticationMechanisms.Remove("XOAUTH2");
-						client.Authenticate(config.SmtpUser, config.SmtpUserPassword);
+                if (fromAddress == null)
+                    fromAddress = new MailboxAddress(config.AddressFrom, config.AddressFrom);
 
-						await client.SendAsync(message);
-					}
-					finally
-					{
-						if (client != null)
-						{
-							if (client.IsConnected)
-								client.Disconnect(true);
-						}
-					}
-				}
+                MimeMessage message = new MimeMessage()
+                {
+                    Subject = subject,
+                    Body = new TextPart("plain")
+                    {
+                        Text = body
+                    }
+                };
+                message.From.Add(fromAddress);
+                message.To.Add(toAddress);
 
-				return true;
-			}
-			catch (Exception ex)
-			{
-				log.Error(Declaration, ex);
-				throw;
-			}
-		}
-		#endregion
-	}
+                using (SmtpClient client = new SmtpClient())
+                {
+                    try
+                    {
+                        client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                        client.Connect(config.SmtpServer, Convert.ToInt32(config.SmtpPort), true);
+                        // Note: since we don't have an OAuth2 token, disable
+                        // the XOAUTH2 authentication mechanism.
+                        client.AuthenticationMechanisms.Remove("XOAUTH2");
+                        client.Authenticate(config.SmtpUser, config.SmtpUserPassword);
+
+                        client.Send(message);
+                    }
+                    finally
+                    {
+                        if (client != null)
+                        {
+                            if (client.IsConnected)
+                                client.Disconnect(true);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log?.Error(Declaration, ex);
+                Logger?.LogError(Declaration, ex);
+                throw;
+            }
+        }
+
+        private async Task<bool> SendAsync(MailboxAddress toAddress, string subject, string body, MailboxAddress fromAddress, Configuration.ApplicationEmail config)
+        {
+            Enforce.AgainstNull(() => toAddress);
+            Enforce.AgainstNullOrEmpty(() => subject);
+            Enforce.AgainstNullOrEmpty(() => body);
+
+            const string Declaration = "Send";
+
+            try
+            {
+                if ((config == null) && !config.Enabled)
+                    return await Task.FromResult(false);
+
+                if (string.IsNullOrEmpty(config.SmtpServer))
+                    //throw new EmailInvalidConfigurationException("Unable to send email, no SmtpServer specified in configuration.");
+                    throw new Exception("Unable to send email, no SmtpServer specified in configuration.");
+
+                if (fromAddress == null)
+                    fromAddress = new MailboxAddress(config.AddressFrom, config.AddressFrom);
+
+                MimeMessage message = new MimeMessage()
+                {
+                    Subject = subject,
+                    Body = new TextPart("plain")
+                    {
+                        Text = body
+                    }
+                };
+                message.From.Add(fromAddress);
+                message.To.Add(toAddress);
+
+                using (SmtpClient client = new SmtpClient())
+                {
+                    try
+                    {
+                        client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                        client.Connect(config.SmtpServer, Convert.ToInt32(config.SmtpPort), false);
+                        // Note: since we don't have an OAuth2 token, disable
+                        // the XOAUTH2 authentication mechanism.
+                        client.AuthenticationMechanisms.Remove("XOAUTH2");
+                        client.Authenticate(config.SmtpUser, config.SmtpUserPassword);
+
+                        await client.SendAsync(message);
+                    }
+                    finally
+                    {
+                        if (client != null)
+                        {
+                            if (client.IsConnected)
+                                client.Disconnect(true);
+                        }
+                    }
+                }
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Log?.Error(Declaration, ex);
+                Logger?.LogError(Declaration, ex);
+                throw;
+            }
+        }
+        #endregion
+    }
 }

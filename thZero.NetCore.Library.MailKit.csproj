@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>netstandard2.0</TargetFramework>
 		<AssemblyName>thZero.NetCore.Library.MailKit</AssemblyName>
 		<PackageId>thZero.NetCore.Library.MailKit</PackageId>
     <Description></Description>

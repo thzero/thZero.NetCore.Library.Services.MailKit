@@ -2,8 +2,8 @@
 
 	<PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-		<AssemblyName>thZero.NetCore.Library.MailKit</AssemblyName>
-		<PackageId>thZero.NetCore.Library.MailKit</PackageId>
+		<AssemblyName>thZero.NetCore.Library.Services.MailKit</AssemblyName>
+		<PackageId>thZero.NetCore.Library.Services.MailKit</PackageId>
     <Description></Description>
     <Authors>thZero.com</Authors>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
@@ -13,9 +13,9 @@
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/thzero/thZero.NetCore.Library.MailKit</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/thzero/thZero.NetCore.Library.Services.MailKit</PackageProjectUrl>
 		<RepositoryType>GitHub</RepositoryType>
-    <RepositoryUrl>https://github.com/thzero/thZero.NetCore.Library.MailKit</RepositoryUrl>
+    <RepositoryUrl>https://github.com/thzero/thZero.NetCore.Library.Services.MailKit</RepositoryUrl>
 	</PropertyGroup>
 
 	<ItemGroup>

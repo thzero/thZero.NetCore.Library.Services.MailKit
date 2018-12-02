@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26228.9
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "thZero.NetCore.Library.MailKit", "thZero.NetCore.Library.MailKit.csproj", "{52B5C4CD-4CEA-4E88-B552-F9BCF0484332}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "thZero.NetCore.Library.Services.MailKit", "thZero.NetCore.Library.Services.MailKit.csproj", "{52B5C4CD-4CEA-4E88-B552-F9BCF0484332}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "thZero.NetCore.Library", "..\thZero.NetCore.Library\thZero.NetCore.Library.csproj", "{1539293C-276D-47D0-B7E6-F48DE3B9B84A}"
 EndProject

@@ -167,9 +167,9 @@ namespace thZero.Services.Internal
                 if ((config == null) && !config.Enabled)
                     return;
 
-                if (string.IsNullOrEmpty(config.SmtpServer))
-                    //throw new EmailInvalidConfigurationException("Unable to send email, no SmtpServer specified in configuration.");
-                    throw new Exception("Unable to send email, no SmtpServer specified in configuration.");
+                if (string.IsNullOrEmpty(config.Smtp.Server))
+                    //throw new EmailInvalidConfigurationException("Unable to send email, no Smtp.Server specified in configuration.");
+                    throw new Exception("Unable to send email, no Smtp.Server specified in configuration.");
 
                 if (fromAddress == null)
                     fromAddress = new MailboxAddress(config.AddressFrom, config.AddressFrom);
@@ -190,11 +190,11 @@ namespace thZero.Services.Internal
                     try
                     {
                         client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                        client.Connect(config.SmtpServer, Convert.ToInt32(config.SmtpPort), true);
+                        client.Connect(config.Smtp.Server, Convert.ToInt32(config.Smtp.Port), true);
                         // Note: since we don't have an OAuth2 token, disable
                         // the XOAUTH2 authentication mechanism.
                         client.AuthenticationMechanisms.Remove("XOAUTH2");
-                        client.Authenticate(config.SmtpUser, config.SmtpUserPassword);
+                        client.Authenticate(config.Smtp.User, config.Smtp.UserPassword);
 
                         client.Send(message);
                     }
@@ -229,9 +229,9 @@ namespace thZero.Services.Internal
                 if ((config == null) && !config.Enabled)
                     return await Task.FromResult(false);
 
-                if (string.IsNullOrEmpty(config.SmtpServer))
-                    //throw new EmailInvalidConfigurationException("Unable to send email, no SmtpServer specified in configuration.");
-                    throw new Exception("Unable to send email, no SmtpServer specified in configuration.");
+                if (string.IsNullOrEmpty(config.Smtp.Server))
+                    //throw new EmailInvalidConfigurationException("Unable to send email, no Smtp.Server specified in configuration.");
+                    throw new Exception("Unable to send email, no Smtp.Server specified in configuration.");
 
                 if (fromAddress == null)
                     fromAddress = new MailboxAddress(config.AddressFrom, config.AddressFrom);
@@ -252,11 +252,11 @@ namespace thZero.Services.Internal
                     try
                     {
                         client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                        client.Connect(config.SmtpServer, Convert.ToInt32(config.SmtpPort), false);
+                        client.Connect(config.Smtp.Server, Convert.ToInt32(config.Smtp.Port), false);
                         // Note: since we don't have an OAuth2 token, disable
                         // the XOAUTH2 authentication mechanism.
                         client.AuthenticationMechanisms.Remove("XOAUTH2");
-                        client.Authenticate(config.SmtpUser, config.SmtpUserPassword);
+                        client.Authenticate(config.Smtp.User, config.Smtp.UserPassword);
 
                         await client.SendAsync(message);
                     }

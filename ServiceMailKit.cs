@@ -92,24 +92,24 @@ namespace thZero.Services.Internal
         #region Public Methods
         public void Send(string toAddress, string subject, string body, Configuration.ApplicationEmail config)
         {
-            Send(new MailboxAddress(toAddress), subject, body, null, config);
+            Send(new MailboxAddress("send", toAddress), subject, body, null, config);
         }
 
         public void Send(string toAddress, string subject, string body, string fromAddress, Configuration.ApplicationEmail config)
         {
             Enforce.AgainstNullOrEmpty(() => fromAddress);
 
-            Send(new MailboxAddress(toAddress), subject, body, new MailboxAddress(fromAddress), config);
+            Send(new MailboxAddress("send", toAddress), subject, body, new MailboxAddress("send", fromAddress), config);
         }
 
         public async Task<bool> SendAsync(string toAddress, string subject, string body, Configuration.ApplicationEmail config)
         {
-            return await SendAsync(new MailboxAddress(toAddress), subject, body, null, config);
+            return await SendAsync(new MailboxAddress("send", toAddress), subject, body, null, config);
         }
 
         public async Task<bool> SendAsync(string toAddress, string subject, string body, string fromAddress, Configuration.ApplicationEmail config)
         {
-            return await SendAsync(new MailboxAddress(toAddress), subject, body, new MailboxAddress(fromAddress), config);
+            return await SendAsync(new MailboxAddress("send", toAddress), subject, body, new MailboxAddress("send", fromAddress), config);
         }
 
         public void Send(string toAddress, string toDisplayName, string subject, string body, string fromAddress, string fromDisplayName, Configuration.ApplicationEmail config)

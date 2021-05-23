@@ -174,7 +174,7 @@ namespace thZero.Services.Internal
                 if (fromAddress == null)
                     fromAddress = new MailboxAddress(config.AddressFrom, config.AddressFrom);
 
-                MimeMessage message = new MimeMessage()
+                MimeMessage message = new()
                 {
                     Subject = subject,
                     Body = new TextPart("plain")
@@ -185,26 +185,24 @@ namespace thZero.Services.Internal
                 message.From.Add(fromAddress);
                 message.To.Add(toAddress);
 
-                using (SmtpClient client = new SmtpClient())
+                using SmtpClient client = new();
+                try
                 {
-                    try
-                    {
-                        client.ServerCertificateValidationCallback = (s, c, h, e) => true;
-                        client.Connect(config.Smtp.Server, Convert.ToInt32(config.Smtp.Port), true);
-                        // Note: since we don't have an OAuth2 token, disable
-                        // the XOAUTH2 authentication mechanism.
-                        client.AuthenticationMechanisms.Remove("XOAUTH2");
-                        client.Authenticate(config.Smtp.User, config.Smtp.UserPassword);
+                    client.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                    client.Connect(config.Smtp.Server, Convert.ToInt32(config.Smtp.Port), true);
+                    // Note: since we don't have an OAuth2 token, disable
+                    // the XOAUTH2 authentication mechanism.
+                    client.AuthenticationMechanisms.Remove("XOAUTH2");
+                    client.Authenticate(config.Smtp.User, config.Smtp.UserPassword);
 
-                        client.Send(message);
-                    }
-                    finally
+                    client.Send(message);
+                }
+                finally
+                {
+                    if (client != null)
                     {
-                        if (client != null)
-                        {
-                            if (client.IsConnected)
-                                client.Disconnect(true);
-                        }
+                        if (client.IsConnected)
+                            client.Disconnect(true);
                     }
                 }
             }
@@ -236,7 +234,7 @@ namespace thZero.Services.Internal
                 if (fromAddress == null)
                     fromAddress = new MailboxAddress(config.AddressFrom, config.AddressFrom);
 
-                MimeMessage message = new MimeMessage()
+                MimeMessage message = new()
                 {
                     Subject = subject,
                     Body = new TextPart("plain")
@@ -247,7 +245,7 @@ namespace thZero.Services.Internal
                 message.From.Add(fromAddress);
                 message.To.Add(toAddress);
 
-                using (SmtpClient client = new SmtpClient())
+                using (SmtpClient client = new())
                 {
                     try
                     {

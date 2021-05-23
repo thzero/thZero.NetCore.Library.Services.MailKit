@@ -36,7 +36,7 @@ namespace thZero.Services
         }
     }
 
-    public sealed class ServiceMailKit : ServiceLoggableBase<ServiceMailKit>, IServiceMail
+    public sealed class ServiceMailKit : ServiceBase<ServiceMailKit>, IServiceMail
     {
         public ServiceMailKit(ILogger<ServiceMailKit> logger) : base(logger)
         {
